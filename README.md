@@ -9,7 +9,6 @@ the following metrics evaluate the performance of LSST for
 
 [periodicLc](https://github.com/xiaolng/maf/blob/master/periodicLc.ipynb)
 
-[supernova]
+more metrics are coming 
 
-
-see [ref](https://github.com/xiaolng/maf/tree/master/ref) for more information 
+see [ref](https://github.com/xiaolng/maf/tree/master/ref) for related publications. 
