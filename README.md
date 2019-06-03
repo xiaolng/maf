@@ -6,9 +6,9 @@ view [newMetric](https://github.com/xiaolng/maf/blob/master/newMetric.ipynb) to 
 
 the following metrics evaluate the performance of LSST for
 
-[transients](https://github.com/xiaolng/maf/blob/master/Transient.ipynb)
+- [transients](https://github.com/xiaolng/maf/blob/master/Transient.ipynb)
 
-[periodicLc](https://github.com/xiaolng/maf/blob/master/periodicLc.ipynb)
+- [periodicLc](https://github.com/xiaolng/maf/blob/master/periodicLc.ipynb)
 
 more metrics are coming 
 
