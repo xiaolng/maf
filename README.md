@@ -8,7 +8,7 @@ the following metrics evaluate the performance of LSST for
 
 - [transients](https://github.com/xiaolng/maf/blob/master/Transient.ipynb)
 
-- [periodicLc](https://github.com/xiaolng/maf/blob/master/periodicLc.ipynb)
+- [periodicLc](https://github.com/xiaolng/maf/blob/master/periodicMetric.ipynb)
 
 more metrics are coming 
 
