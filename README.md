@@ -12,7 +12,7 @@ the following metrics evaluate the performance of LSST for
 
 - [supernova](https://github.com/xiaolng/maf/blob/master/snMetric.ipynb)
 
-- [TDEs](https://github.com/xiaolng/maf/blob/master/TDEs_v3.ipynb) 
+- [TDEs](https://github.com/xiaolng/maf/blob/master/TDEsMetricTest.ipynb) 
 
 more metrics are coming 
 
