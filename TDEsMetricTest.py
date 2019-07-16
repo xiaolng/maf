@@ -28,21 +28,61 @@ class TDEsMetricTest(BaseMetric):
         Values must be provided for each filter which should be considered in the lightcurve.
         Default is {'u': 5, 'g': 5, 'r': 5, 'i': 5, 'z': 5, 'y': 5}
     
+    Light curve parameters
+    -------------
+    epochStart: float
+        The start epoch in ascii file.
+        
+    peakEpoch: float
+        The epoch of the peak in ascii file.
 
+    nearPeakT: float
+        The days near peak.  Epoches from (peakEpoch - nearPeakT/2) to (peakEpoch + nearPeakT/2) 
+        is considered as near peak.
+    
+    nPhaseCheck: float
+        Number of phases to check.
+    
+
+    Condition parameters
+    --------------
+    nObsTotal: dict
+        Minimum required total number of observations in each band.
+
+    nObsPrePeak: float
+        Number of observations before peak.
+
+    nObsNearPeak: dict
+        Minimum required number of observations in each band near peak.
+
+    nFiltersNearPeak: float
+        Number of filters near peak.
+
+    nObsPostPeak: float
+        Number of observations after peak.
+
+    nFiltersPostPeak: float
+        Number of filters after peak. 
+
+
+    Output control parameters
+    --------------
     dataout : bool, optional
         If True, metric returns full lightcurve at each point. Note that this will potentially
-        create a very large metric output data file.
+        create a very large metric output data file. 
         If False, metric returns the number of transients detected.
+
     """
-    def __init__(self, asciifile, metricName='TDEsMetricTest', mjdCol='expMJD',
-                 m5Col='fiveSigmaDepth', filterCol='filter', 
-                 detectSNR={'u': 5, 'g': 5, 'r': 5, 'i': 5, 'z': 5, 'y': 5}, 
-                 peakEpoch=0, nearPeakT=5, 
+
+    def __init__(self, asciifile, metricName = 'TDEsMetricTest', mjdCol = 'expMJD',
+                 m5Col = 'fiveSigmaDepth', filterCol = 'filter', 
+                 detectSNR = {'u': 5, 'g': 5, 'r': 5, 'i': 5, 'z': 5, 'y': 5}, 
+                 peakEpoch = 0, nearPeakT=5, 
                  nObsTotal = {'u': 5, 'g': 5, 'r': 5, 'i': 5, 'z': 5, 'y': 5}, 
                  nObsPrePeak = 0,
-                 nObsNearPeak={'u': 5, 'g': 5, 'r': 5, 'i': 5, 'z': 5, 'y': 5},
+                 nObsNearPeak = {'u': 5, 'g': 5, 'r': 5, 'i': 5, 'z': 5, 'y': 5},
                  nFiltersNearPeak = 0, 
-                 nObsPostPeak = 0,
+                 nObsPostPeak = 0, nFiltersPostPeak = 0, 
                  nPhaseCheck = 1, epochStart = 0, 
                  dataout=False, **kwargs):
         
@@ -60,6 +100,7 @@ class TDEsMetricTest(BaseMetric):
         self.nObsNearPeak = nObsNearPeak
         self.nFiltersNearPeak = nFiltersNearPeak
         self.nObsPostPeak = nObsPostPeak
+        self.nFiltersPostPeak = nFiltersPostPeak
         self.epochStart = epochStart
         self.nPhaseCheck = nPhaseCheck
 
@@ -113,6 +154,7 @@ class TDEsMetricTest(BaseMetric):
         ----------
         dataSlice : numpy.array
             Numpy structured array containing the data related to the visits provided by the slicer.
+        
         slicePoint : dict, optional
             Dictionary containing information about the slicepoint currently active in the slicer.
 
@@ -189,7 +231,6 @@ class TDEsMetricTest(BaseMetric):
                 for f in np.unique(lcFilters_i):
                     nearPeakIdx_f = np.intersect1d( nearPeakIdx, np.where(lcFilters_i==f) )
                     if len( np.where(lcAboveThresh_i[nearPeakIdx_f])[0] ) < self.nObsNearPeak[f]:
-                        print('filter ', f, 'condition works')
                         lcDetect[i] = False
                         lcDetectOut[lcN_idx] = False
 
@@ -207,11 +248,16 @@ class TDEsMetricTest(BaseMetric):
                     lcDetect[i] = False
                     lcDetectOut[lcN_idx] = False
 
+                # check number of filters post peak
+                filtersPostPeakIdx = np.intersect1d(postPeakIdx, np.where(lcAboveThresh)[0])
+                if len( np.unique(lcFilters_i[filtersPostPeakIdx]) ) < self.nFiltersPostPeak:
+                        lcDetect[i] = False
+                        lcDetectOut[lcN_idx] = False
+
             # return values   
             nDetected += len(np.where(lcDetect == True)[0])
 
             #print(nTransMax, nDetected, lcDetect)
-
             dataout_dict_tshift = {'tshift': tshift, 
                         'expMJD' : dataSlice[self.mjdCol],
                         'm5' : dataSlice[self.m5Col],
