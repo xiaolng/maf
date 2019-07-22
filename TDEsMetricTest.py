@@ -40,6 +40,9 @@ class TDEsMetricTest(BaseMetric):
         The days near peak.  Epoches from (peakEpoch - nearPeakT/2) to (peakEpoch + nearPeakT/2) 
         is considered as near peak.
     
+    postPeakT: float
+        The days with postPeakT are considered as post peak. Post peak epoch is peakEpoch + nearPeakT/2 + postPeakT.
+
     nPhaseCheck: float
         Number of phases to check.
     
@@ -74,35 +77,37 @@ class TDEsMetricTest(BaseMetric):
 
     """
 
-    def __init__(self, asciifile, metricName = 'TDEsMetricTest', mjdCol = 'expMJD',
-                 m5Col = 'fiveSigmaDepth', filterCol = 'filter', 
+    def __init__(self, asciifile, metricName = 'TDEsMetricTest', 
+    			 mjdCol = 'expMJD', m5Col = 'fiveSigmaDepth', filterCol = 'filter', 
                  detectSNR = {'u': 5, 'g': 5, 'r': 5, 'i': 5, 'z': 5, 'y': 5}, 
-                 peakEpoch = 0, nearPeakT=5, 
+                 epochStart = 0, peakEpoch = 0, nearPeakT=5, postPeakT=10, nPhaseCheck = 1, 
                  nObsTotal = {'u': 5, 'g': 5, 'r': 5, 'i': 5, 'z': 5, 'y': 5}, 
                  nObsPrePeak = 0,
                  nObsNearPeak = {'u': 5, 'g': 5, 'r': 5, 'i': 5, 'z': 5, 'y': 5},
                  nFiltersNearPeak = 0, 
                  nObsPostPeak = 0, nFiltersPostPeak = 0, 
-                 nPhaseCheck = 1, epochStart = 0, 
                  dataout=False, **kwargs):
         
         self.mjdCol = mjdCol
         self.m5Col = m5Col
         self.filterCol = filterCol
+        self.detectSNR = detectSNR
         self.dataout = dataout
 
-        # condition parameters
-        self.detectSNR = detectSNR
+        # light curve parameters
+        self.epochStart = epochStart
         self.peakEpoch = peakEpoch
         self.nearPeakT = nearPeakT
+        self.postPeakT = postPeakT
+        self.nPhaseCheck = nPhaseCheck
+
+        # condition parameters
         self.nObsTotal = nObsTotal
         self.nObsPrePeak = nObsPrePeak
         self.nObsNearPeak = nObsNearPeak
         self.nFiltersNearPeak = nFiltersNearPeak
         self.nObsPostPeak = nObsPostPeak
         self.nFiltersPostPeak = nFiltersPostPeak
-        self.epochStart = epochStart
-        self.nPhaseCheck = nPhaseCheck
 
         # if you want to get the light curve in output you need to define the metricDtype as object
         if self.dataout:
@@ -218,7 +223,7 @@ class TDEsMetricTest(BaseMetric):
                         lcDetectOut[lcN_idx] = False
                 
                 # number of observations before peak
-                prePeakCheck = (lcEpoch_i < self.peakEpoch)
+                prePeakCheck = (lcEpoch_i < self.peakEpoch - self.nearPeakT/2)
                 prePeakIdx = np.where(prePeakCheck == True)
                 if len( np.where(lcAboveThresh_i[prePeakIdx])[0] ) < self.nObsPrePeak:
                     lcDetect[i] = False
@@ -242,7 +247,7 @@ class TDEsMetricTest(BaseMetric):
 
                 ## check number of observations post peak
                 # postPeakCheck 
-                postPeakCheck = (lcEpoch_i > self.peakEpoch)
+                postPeakCheck = (lcEpoch_i >= self.peakEpoch + self.nearPeakT/2) & (lcEpoch_i <= self.nearPeakT + self.nearPeakT/2 + self.postPeakT )
                 postPeakIdx = np.where(postPeakCheck == True)
                 if len( np.where(lcAboveThresh_i[postPeakIdx])[0] ) < self.nObsPostPeak:
                     lcDetect[i] = False
@@ -256,14 +261,20 @@ class TDEsMetricTest(BaseMetric):
 
             # return values   
             nDetected += len(np.where(lcDetect == True)[0])
+            prePeakCheck = (lcEpoch <= self.peakEpoch - self.nearPeakT/2) 
+            nearPeakCheck = (lcEpoch >= (self.peakEpoch - self.nearPeakT/2)) & (lcEpoch <= (self.peakEpoch + self.nearPeakT/2) )
+            postPeakCheck = (lcEpoch >= (self.peakEpoch + self.nearPeakT/2)) & (lcEpoch <= (self.nearPeakT + self.nearPeakT/2 + self.postPeakT) )
 
             #print(nTransMax, nDetected, lcDetect)
-            dataout_dict_tshift = {'tshift': tshift, 
+            dataout_dict_tshift = {'tshift': np.repeat(tshift, len(lcEpoch)), 
                         'expMJD' : dataSlice[self.mjdCol],
                         'm5' : dataSlice[self.m5Col],
                         'filters': dataSlice[self.filterCol],
                         'lcNumber': lcNumber,
                         'lcEpoch': lcEpoch,
+                        'prePeakCheck': prePeakCheck,
+                        'nearPeakCheck': nearPeakCheck,
+                        'postPeakCheck': postPeakCheck,
                         'lcMags': lcMags,
                         'lcSNR': lcSNR, 
                         'lcMagsStd': self.snr2std(lcSNR),
