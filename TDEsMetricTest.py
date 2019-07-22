@@ -240,21 +240,21 @@ class TDEsMetricTest(BaseMetric):
                         lcDetectOut[lcN_idx] = False
 
                 # check number of filters near peak
-                filtersNearPeakIdx = np.intersect1d(nearPeakIdx, np.where(lcAboveThresh)[0])
+                filtersNearPeakIdx = np.intersect1d(nearPeakIdx, np.where(lcAboveThresh_i)[0])
                 if len( np.unique(lcFilters_i[filtersNearPeakIdx]) ) < self.nFiltersNearPeak:
                         lcDetect[i] = False
                         lcDetectOut[lcN_idx] = False
 
                 ## check number of observations post peak
                 # postPeakCheck 
-                postPeakCheck = (lcEpoch_i >= self.peakEpoch + self.nearPeakT/2) & (lcEpoch_i <= self.nearPeakT + self.nearPeakT/2 + self.postPeakT )
+                postPeakCheck = (lcEpoch_i >= self.peakEpoch + self.nearPeakT/2) & (lcEpoch_i <= self.peakEpoch + self.nearPeakT/2 + self.postPeakT )
                 postPeakIdx = np.where(postPeakCheck == True)
                 if len( np.where(lcAboveThresh_i[postPeakIdx])[0] ) < self.nObsPostPeak:
                     lcDetect[i] = False
                     lcDetectOut[lcN_idx] = False
 
                 # check number of filters post peak
-                filtersPostPeakIdx = np.intersect1d(postPeakIdx, np.where(lcAboveThresh)[0])
+                filtersPostPeakIdx = np.intersect1d(postPeakIdx, np.where(lcAboveThresh_i)[0])
                 if len( np.unique(lcFilters_i[filtersPostPeakIdx]) ) < self.nFiltersPostPeak:
                         lcDetect[i] = False
                         lcDetectOut[lcN_idx] = False
@@ -263,7 +263,7 @@ class TDEsMetricTest(BaseMetric):
             nDetected += len(np.where(lcDetect == True)[0])
             prePeakCheck = (lcEpoch <= self.peakEpoch - self.nearPeakT/2) 
             nearPeakCheck = (lcEpoch >= (self.peakEpoch - self.nearPeakT/2)) & (lcEpoch <= (self.peakEpoch + self.nearPeakT/2) )
-            postPeakCheck = (lcEpoch >= (self.peakEpoch + self.nearPeakT/2)) & (lcEpoch <= (self.nearPeakT + self.nearPeakT/2 + self.postPeakT) )
+            postPeakCheck = (lcEpoch >= (self.peakEpoch + self.nearPeakT/2)) & (lcEpoch <= (self.peakEpoch + self.nearPeakT/2 + self.postPeakT) )
 
             #print(nTransMax, nDetected, lcDetect)
             dataout_dict_tshift = {'tshift': np.repeat(tshift, len(lcEpoch)), 
