@@ -11,9 +11,13 @@ __all__ = ['TDEsAsciiMetric']
 class TDEsAsciiMetric(BaseMetric):
     """Based on the transientMetric, but uses an ascii input file and provides option to write out lightcurve.
     
-    Calculate what fraction of the transients would be detected. Best paired with a spatial slicer.
+    Calculate what fraction of the TDEs would be detected. Best paired with a spatial slicer.
     The lightcurve in input is an ascii file per photometric band so that different lightcurve
     shapes can be implemented.
+
+    This metric is designed to evaluate the detection of TDEs with the requirement that allows discrimination 
+    from supernova. The structure is similar to TransientAsciiMetric, but the condition parameters are different.
+    It can be used to put requirements on the number of observations or filters before peak, near peak and post peak. 
 
     Parameters
     ----------
@@ -299,4 +303,5 @@ class TDEsAsciiMetric(BaseMetric):
         else: 
             # return the fraction detected
             return float(nDetected / nTransMax) if nTransMax!=0 else 0.
+
 
